@@ -7,18 +7,29 @@
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import io.nats.client.Connection;
 import io.nats.client.Dispatcher;
+import io.nats.client.Message;
+import io.nats.client.MessageHandler;
 import io.nats.client.Nats;
-import io.nats.client.Options;
 
-public class SEC {
+public class SEC implements MessageHandler {
 
     private static final String LOG_FILE_PATH = "suspicions.log";
+    private String brokerName;
+
+    public SEC(String brokerName) {
+        this.brokerName = brokerName;
+    }
+
+    public void onMessage(Message message) throws InterruptedException {
+        // Extract broker and client name from message
+        String messageData = new String(message.getData());
+        // String broker = ex
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // Initialize NATS connection and subscribe to relevant messages
@@ -27,6 +38,7 @@ public class SEC {
         Connection nc = Nats.connect("nats://localhost:4222");
         Dispatcher d = nc.createDispatcher((msg) -> {
             System.out.println(new String(msg.getData()));
+            processOrderMessage(new String(msg.getData()));
         });
 
         d.subscribe("orders");
@@ -39,7 +51,7 @@ public class SEC {
         // }
 
         // Simulated message processing
-        simulateMessageProcessing();
+        
     }
 
     private static void simulateMessageProcessing() {
@@ -55,6 +67,7 @@ public class SEC {
 
     private static void logSuspiciousTransaction(LocalDateTime timestamp, String client, String broker,
                                                  String order, double amount) {
+        System.out.println("*****************");
         String logEntry = String.format("Timestamp: %s, Client: %s, Broker: %s, Order: %s, Amount: %.2f%n",
                 timestamp, client, broker, order, amount);
 
@@ -67,16 +80,22 @@ public class SEC {
     }
 
     // Example message processing method for orders
-    private static void processOrderMessage(String subject, String message) {
-        // Extract relevant information from the message
+    private static void processOrderMessage(String message) {
         // Example:
 
-        message = "<orderReceipt><sell symbol=\"MSFT\" amount=\"40\" /><complete amount=\"180000\" /></orderReceipt>";
+        // message = "<orderReceipt><sell symbol=\"MSFT\" amount=\"40\" /><complete amount=\"180000\" /></orderReceipt>";
 
         Pattern orderReceiptPattern = Pattern.compile("<orderReceipt>(.+?)</orderReceipt>");
         Matcher orderReceiptMatcher = orderReceiptPattern.matcher(message);
 
         if (orderReceiptMatcher.find()) {
+            String dollarAmount = "";
+            String client = "";
+            String order = "";
+            String broker = "";
+            String symbol = "";
+            String stockAmount = "";
+
             String orderReceiptContent = orderReceiptMatcher.group(1);
 
             Pattern buyPattern = Pattern.compile("<buy symbol=\"(.+?)\" amount=\"(\\d+)\" />");
@@ -86,48 +105,37 @@ public class SEC {
             Matcher sellMatcher = sellPattern.matcher(orderReceiptContent);
 
             if (buyMatcher.find()) {
-                String symbol = buyMatcher.group(1);
-                String stockAmount = buyMatcher.group(2);
+                symbol = buyMatcher.group(1);
+                stockAmount = buyMatcher.group(2);
 
                 // Extract complete amount
-                String completeAmount = "";
                 Pattern completePattern = Pattern.compile("<complete amount=\"(\\d+)\" />");
                 Matcher completeMatcher = completePattern.matcher(orderReceiptContent);
 
                 if (completeMatcher.find()) {
-                    completeAmount = completeMatcher.group(1);
+                    dollarAmount = completeMatcher.group(1);
                 }
-                
 
-                // Print the extracted values
-                System.out.println("Symbol: " + symbol);
-                System.out.println("Stock Amount: " + stockAmount);
-                System.out.println("Dollar Amount: " + completeAmount);
             } else if (sellMatcher.find()) {
-                String symbol = sellMatcher.group(1);
-                String stockAmount = sellMatcher.group(2);
+                symbol = sellMatcher.group(1);
+                stockAmount = sellMatcher.group(2);
 
-                // Extract complete amount
-                String completeAmount = "";
                 Pattern completePattern = Pattern.compile("<complete amount=\"(\\d+)\" />");
                 Matcher completeMatcher = completePattern.matcher(orderReceiptContent);
 
                 if (completeMatcher.find()) {
-                    completeAmount = completeMatcher.group(1);
+                    dollarAmount = completeMatcher.group(1);
                 }
+            }
+            System.out.println("Symbol: " + symbol);
+            System.out.println("Stock Amount: " + stockAmount);
+            System.out.println("Dollar Amount: " + dollarAmount);
 
-                // Print the extracted values
-                System.out.println("Symbol: " + symbol);
-                System.out.println("Stock Amount: " + stockAmount);
-                System.out.println("Dollar Amount: " + completeAmount);
+            if (Double.parseDouble(dollarAmount) > 5000.0) {
+                System.out.println("logging suspicious amount");
+                logSuspiciousTransaction(LocalDateTime.now(), client, broker, order, Double.parseDouble(dollarAmount));
             }
         }
-
-
-        // Check if the transaction amount is suspicious
-        // if (amount > 5000.0) {
-        //     logSuspiciousTransaction(LocalDateTime.now(), client, broker, order, amount);
-        // }
     }
 }
 
