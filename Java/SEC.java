@@ -67,7 +67,6 @@ public class SEC implements MessageHandler {
 
     private static void logSuspiciousTransaction(LocalDateTime timestamp, String client, String broker,
                                                  String order, double amount) {
-        System.out.println("*****************");
         String logEntry = String.format("Timestamp: %s, Client: %s, Broker: %s, Order: %s, Amount: %.2f%n",
                 timestamp, client, broker, order, amount);
 
@@ -130,6 +129,7 @@ public class SEC implements MessageHandler {
             System.out.println("Symbol: " + symbol);
             System.out.println("Stock Amount: " + stockAmount);
             System.out.println("Dollar Amount: " + dollarAmount);
+            System.out.println();
 
             if (Double.parseDouble(dollarAmount) > 5000.0) {
                 System.out.println("logging suspicious amount");
