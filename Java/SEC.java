@@ -14,6 +14,8 @@ import io.nats.client.Connection;
 import io.nats.client.Dispatcher;
 import io.nats.client.Message;
 import io.nats.client.MessageHandler;
+import io.nats.client.impl.Headers;
+import io.nats.client.impl.NatsMessage;
 import io.nats.client.Nats;
 
 public class SEC implements MessageHandler {
@@ -32,14 +34,14 @@ public class SEC implements MessageHandler {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        // Initialize NATS connection and subscribe to relevant messages
-        // Example code for NATS subscription:
         // nats.subscribe("orders.*", SEC::processOrderMessage);
         Connection nc = Nats.connect("nats://localhost:4222");
         Dispatcher d = nc.createDispatcher((msg) -> {
             System.out.println(new String(msg.getData()));
             processOrderMessage(new String(msg.getData()));
         });
+        
+        NatsMessage.builder().subject("").headers(new Headers().)
 
         d.subscribe("orders");
 
