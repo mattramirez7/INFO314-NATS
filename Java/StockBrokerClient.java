@@ -87,9 +87,8 @@ public class StockBrokerClient{
                     connection.publish(brokerString, xmlRequest.getBytes());
 
                     // Subscription sub = connection.subscribe(brokerResponse);
-                    Message responseMessage = sub.nextMessage(Duration.ofMillis(5000));
+                    Message responseMessage = sub.nextMessage(Duration.ofMillis(100));
                     if (responseMessage == null) {
-                        System.out.println("No response recieved");
                         System.out.println();
                     } else {
                         String brokerResponse = new String(responseMessage.getData(), StandardCharsets.UTF_8);

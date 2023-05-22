@@ -1,8 +1,13 @@
 import io.nats.client.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StockBroker {
@@ -10,19 +15,37 @@ public class StockBroker {
     private Dispatcher dispatcher;
     private Connection natsConnection;
     private String clientName;
+    private Dispatcher priceGetter;
+    private HashMap<String, Double> stockPrices;
 
     public StockBroker(String brokerName, Connection connection) {
         this.brokerName = brokerName;
         this.natsConnection = connection;
 
         //This takes the class instance of processOrder and uses that as message handler
+        this.stockPrices = new HashMap<String, Double>();
         this.dispatcher = connection.createDispatcher(this::processOrder);
+        this.priceGetter = connection.createDispatcher(this::getPrice);
         
 
     }
 
+    private void getPrice(Message message) {
+        String xmlData = new String(message.getData());
+        int startIndex = xmlData.indexOf("<name>") + "<name>".length();
+        int endIndex = xmlData.indexOf("</name>");
+        String symbol = xmlData.substring(startIndex, endIndex);
+        Double price = Double.parseDouble(xmlData.substring(xmlData.indexOf("<adjustedPrice>") + "<adjustedPrice>".length(), xmlData.indexOf("</adjustedPrice>")));
+    
+        this.stockPrices.put(symbol, price);
+    }
+
     public void subscribe(String topic) {
         dispatcher.subscribe(topic);
+    }
+
+    public void priceSubscribe(String topic) {
+        priceGetter.subscribe(topic);
     }
 
     public void unsubscribe(String topic) {
@@ -30,11 +53,12 @@ public class StockBroker {
     }
 
     private void processOrder(Message message) {
+        System.out.println("NEW ORDER RECIEVED!!!");
         String order = new String(message.getData());
         System.out.println(order);
 
         try {
-            Thread.sleep(3000); // Simulate order execution
+            Thread.sleep(1000); // Simulate order execution
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -63,28 +87,28 @@ public class StockBroker {
     }
 
     private double getStockPrice(String symbol) {
-        String xmlData = subscribeAndGetXmlData(symbol);
-        return extractStockPrice(xmlData);
+        return this.stockPrices.get(symbol);
     }
  
-    private String subscribeAndGetXmlData(String symbol) {
-        try {
-            String topic = "NASDAQ." + symbol;
-            String xmlData = "";
-            Subscription sub = natsConnection.subscribe(topic);
-            while (xmlData == "") {
-                Message nextMessage = sub.nextMessage(1000);
-                if (nextMessage != null) {
-                    xmlData = new String(nextMessage.getData());
-                }
-            }
-            return xmlData;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }      
-    }
-
+    // private String subscribeAndGetXmlData(String symbol) {
+    //     try {
+    //         String topic = "NASDAQ." + symbol;
+    //         String xmlData = "";
+    //         Subscription sub = natsConnection.subscribe(topic);
+    //         while (xmlData == "") {
+    //             Message nextMessage = sub.nextMessage(1);
+    //             if (nextMessage != null) {
+    //                 xmlData = new String(nextMessage.getData());
+    //             }
+    //         }
+    //         return xmlData;
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         return null;
+    //     }      
+    // }
+    
+    
     private double extractStockPrice(String xmlData) {
         Double data = Double.parseDouble(xmlData.substring(xmlData.indexOf("<adjustedPrice>") + "<adjustedPrice>".length(), xmlData.indexOf("</adjustedPrice>")));
         return (double) (data / 100.f);
@@ -149,6 +173,7 @@ public class StockBroker {
 
             StockBroker stockBroker = new StockBroker(brokerName, connection);
             stockBroker.subscribe("broker."+ brokerName);
+            stockBroker.priceSubscribe("NASDAQ.>");
 
             // connection.flush(Duration.ZERO); // Flush any buffered messages
             // connection.flush(Duration.ofSeconds(100)); // Wait for 100 seconds to receive messages

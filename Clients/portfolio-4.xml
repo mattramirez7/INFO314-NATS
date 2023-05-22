@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!-- A tech-heavy portfolio --><portfolio>
+    <stock symbol="MSFT">0</stock>
+    <stock symbol="AMZN">0</stock>
+    <stock symbol="BLIZ">10000</stock>
+    <stock symbol="GOOG">0</stock>
+    <stock symbol="NTFLX">500</stock>
+    <stock symbol="APPL">500</stock>
+</portfolio>
