@@ -87,14 +87,20 @@ public class StockBrokerClient{
                     connection.publish(brokerString, xmlRequest.getBytes());
 
                     // Subscription sub = connection.subscribe(brokerResponse);
-                    Message responseMessage = sub.nextMessage(Duration.ofMillis(500));
-                    String brokerResponse = new String(responseMessage.getData(), StandardCharsets.UTF_8);
+                    Message responseMessage = sub.nextMessage(Duration.ofMillis(5000));
+                    if (responseMessage == null) {
+                        System.out.println("No response recieved");
+                        System.out.println();
+                    } else {
+                        String brokerResponse = new String(responseMessage.getData(), StandardCharsets.UTF_8);
+                        System.out.println(brokerResponse);
+                        updatePortfolio(stockName, numberOfShares, action);
+                    }
 
                     // Future<Message> incoming = connection.request(brokerString, xmlRequest.getBytes());
                     // Message response = incoming.get(500, TimeUnit.MILLISECONDS);
                     // String brokerResponse = new String(response.getData(), StandardCharsets.UTF_8);
-                    System.out.println(brokerResponse);
-                    updatePortfolio(stockName, numberOfShares, action);
+                    
                 } catch (Exception e){
                     e.printStackTrace();
                 }

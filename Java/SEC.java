@@ -25,12 +25,12 @@ public class SEC {
         try {
             nc = Nats.connect("nats://localhost:4222");
 
-            Subscription brokerSubscription = nc.subscribe("response.*");
-            // Subscription clientSubscription = nc.subscribe("response.*");
+            // Subscription brokerSubscription = nc.subscribe("response.*");
+            Subscription clientSubscription = nc.subscribe("broker.*");
             System.out.println("connected");
             while (true) {
                 // Check for messages from the broker connection
-                Message brokerMessage = brokerSubscription.nextMessage(Duration.ZERO);
+                Message brokerMessage = clientSubscription.nextMessage(Duration.ZERO);
                 if (brokerMessage != null) {
                     processOrderMessage(new String(brokerMessage.getData()));
                 }
@@ -54,9 +54,9 @@ public class SEC {
         }   
     }
 
-    private static void logSuspiciousTransaction(LocalDateTime timestamp, String client, String broker, double amount) {
-        String logEntry = String.format("Timestamp: %s, Client: %s, Broker: %s, Amount: %.2f%n",
-                timestamp, client, broker, amount);
+    private static void logSuspiciousTransaction(LocalDateTime timestamp, String client, String broker, String order, double amount) {
+        String logEntry = String.format("Timestamp: %s, Client: %s, Broker: %s, Order: %s, Amount: %.2f%n",
+                timestamp, client, broker, order, amount);
 
         try (FileWriter writer = new FileWriter(LOG_FILE_PATH, true)) {
             writer.write(logEntry);
@@ -67,15 +67,14 @@ public class SEC {
     }
 
     // Example message processing method for orders
-
     private static void processOrderMessage(String message) {
-        Pattern pattern = Pattern.compile("<orderReceipt brokerId=\"(.+?)\" clientId=\"(.+?)\"><.+ amount=\"(\\d+)\" /><complete amount=\"(\\d+)\" /></orderReceipt>");
+        Pattern pattern = Pattern.compile("<order brokerId=\"(.+?)\" clientId=\"(.+?)\">\\s*<buy amount=\"(\\d+)\" symbol=\"(.+?)\"/>\\s*</order>");
         Matcher matcher = pattern.matcher(message);
 
         if (matcher.find()) {
             String brokerId = matcher.group(1);
             String clientId = matcher.group(2);
-            Double amount = Double.parseDouble(matcher.group(4));
+            int amount = Integer.parseInt(matcher.group(3));
 
             LocalDateTime timestamp = LocalDateTime.now();
 
@@ -83,11 +82,12 @@ public class SEC {
             System.out.println("Timestamp: " + timestamp);
             System.out.println("Client ID: " + clientId);
             System.out.println("Broker ID: " + brokerId);
+            System.out.println("Order: " + message);
             System.out.println("Amount: " + amount);
 
             if (amount > 5000.0) {
                 System.out.println("logging suspicious amount");
-                logSuspiciousTransaction(LocalDateTime.now(), clientId, brokerId, amount);
+                logSuspiciousTransaction(LocalDateTime.now(), clientId, brokerId, message, amount);
             }
         }
     }

@@ -53,10 +53,10 @@ public class StockBroker {
             double amount = Double.parseDouble(matcher.group(2));
             String symbol = matcher.group(3);
             double stockPrice = getStockPrice(symbol);
-            double fee = 0.1 * (type.equals("buy") ? stockPrice * amount : -stockPrice * amount);
+            double fee = 0.1 * (type.equals("buy") ? stockPrice * amount : stockPrice * amount);
             double totalAmount = type.equals("buy") ? stockPrice * amount + fee : stockPrice * amount - fee;
 
-            return totalAmount;
+            return totalAmount / 100.f;
         }
 
         return 0.0;
@@ -70,8 +70,14 @@ public class StockBroker {
     private String subscribeAndGetXmlData(String symbol) {
         try {
             String topic = "NASDAQ." + symbol;
+            String xmlData = "";
             Subscription sub = natsConnection.subscribe(topic);
-            String xmlData = new String(sub.nextMessage(1000).getData());
+            while (xmlData == "") {
+                Message nextMessage = sub.nextMessage(1000);
+                if (nextMessage != null) {
+                    xmlData = new String(nextMessage.getData());
+                }
+            }
             return xmlData;
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,15 +86,8 @@ public class StockBroker {
     }
 
     private double extractStockPrice(String xmlData) {
-        Pattern pattern = Pattern.compile("<price>(\\d+\\.\\d+)</price>");
-        Matcher matcher = pattern.matcher(xmlData);
-
-        if (matcher.find()) {
-            String priceString = matcher.group(1);
-            return Double.parseDouble(priceString);
-        }
-
-        return 0.0;
+        Double data = Double.parseDouble(xmlData.substring(xmlData.indexOf("<adjustedPrice>") + "<adjustedPrice>".length(), xmlData.indexOf("</adjustedPrice>")));
+        return (double) (data / 100.f);
     }
 
     private String constructResponse(String order, double totalAmount) {
