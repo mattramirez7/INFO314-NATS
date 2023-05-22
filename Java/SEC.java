@@ -18,7 +18,7 @@ import io.nats.client.Subscription;
 
 public class SEC {
 
-    private static final String LOG_FILE_PATH = "suspicions.log";
+    private static final String LOG_FILE_PATH = "./suspicions.log";
     private static Connection nc;
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -85,7 +85,7 @@ public class SEC {
             System.out.println("Order: " + message);
             System.out.println("Amount: " + amount);
 
-            if (amount > 5000.0) {
+            if (amount > 5000) {
                 System.out.println("logging suspicious amount");
                 logSuspiciousTransaction(LocalDateTime.now(), clientId, brokerId, message, amount);
             }

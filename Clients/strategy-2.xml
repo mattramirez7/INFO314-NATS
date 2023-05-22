@@ -9,13 +9,13 @@
   <when><stock>ORCL</stock><above>5000</above><sell /></when>
   <when><stock>SBUX</stock><above>5000</above><sell /></when>
 
-  <when><stock>MSFT</stock><below>1000</below><buy>5000</buy></when>
-  <when><stock>AMZN</stock><below>1000</below><buy>5000</buy></when>
-  <when><stock>GOOG</stock><below>1500</below><buy>5000</buy></when>
-  <when><stock>NTFLX</stock><below>1500</below><buy>5000</buy></when>
-  <when><stock>META</stock><below>1500</below><buy>5000</buy></when>
-  <when><stock>ABNB</stock><below>1500</below><buy>50000</buy></when>
-  <when><stock>ADBE</stock><below>1500</below><buy>5000</buy></when>
-  <when><stock>ORCL</stock><below>1500</below><buy>50000</buy></when>
-  <when><stock>SBUX</stock><below>1500</below><buy>5000</buy></when>
+  <when><stock>MSFT</stock><below>1000</below><buy>6000</buy></when>
+  <when><stock>AMZN</stock><below>1000</below><buy>6000</buy></when>
+  <when><stock>GOOG</stock><below>1500</below><buy>6000</buy></when>
+  <when><stock>NTFLX</stock><below>1500</below><buy>6000</buy></when>
+  <when><stock>META</stock><below>1500</below><buy>6000</buy></when>
+  <when><stock>ABNB</stock><below>1500</below><buy>6000</buy></when>
+  <when><stock>ADBE</stock><below>1500</below><buy>6000</buy></when>
+  <when><stock>ORCL</stock><below>1500</below><buy>6000</buy></when>
+  <when><stock>SBUX</stock><below>1500</below><buy>6000</buy></when>
 </strategy>

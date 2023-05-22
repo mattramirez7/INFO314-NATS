@@ -1,0 +1,21 @@
+<strategy>
+  <when><stock>MSFT</stock><above>1000</above><sell /></when>
+  <when><stock>AMZN</stock><above>2000</above><sell /></when>
+  <when><stock>GOOG</stock><above>3000</above><sell /></when>
+  <when><stock>NTFLX</stock><above>5000</above><sell /></when>
+  <when><stock>META</stock><above>4000</above><sell /></when>
+  <when><stock>ABNB</stock><above>5000</above><sell /></when>
+  <when><stock>ADBE</stock><above>6000</above><sell /></when>
+  <when><stock>ORCL</stock><above>5000</above><sell /></when>
+  <when><stock>SBUX</stock><above>5000</above><sell /></when>
+
+  <when><stock>MSFT</stock><below>1000</below><buy>5000</buy></when>
+  <when><stock>AMZN</stock><below>1000</below><buy>5000</buy></when>
+  <when><stock>GOOG</stock><below>1500</below><buy>5000</buy></when>
+  <when><stock>NTFLX</stock><below>1500</below><buy>5000</buy></when>
+  <when><stock>META</stock><below>1500</below><buy>5000</buy></when>
+  <when><stock>ABNB</stock><below>1500</below><buy>50000</buy></when>
+  <when><stock>ADBE</stock><below>1500</below><buy>5000</buy></when>
+  <when><stock>ORCL</stock><below>1500</below><buy>50000</buy></when>
+  <when><stock>SBUX</stock><below>1500</below><buy>5000</buy></when>
+</strategy>

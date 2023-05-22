@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><!-- A tech-heavy portfolio --><portfolio>
     <stock symbol="MSFT">0</stock>
-    <stock symbol="AMZN">66000</stock>
-    <stock symbol="GOOG">0</stock>
-    <stock symbol="NTFLX">100000</stock>
+    <stock symbol="AMZN">570000</stock>
+    <stock symbol="GOOG">469000</stock>
+    <stock symbol="NTFLX">6000</stock>
     <stock symbol="META">0</stock>
     <stock symbol="ABNB">0</stock>
     <stock symbol="ADBE">0</stock>
     <stock symbol="ORCL">0</stock>
-    <stock symbol="SBUX">7000</stock>
+    <stock symbol="SBUX">572000</stock>
 </portfolio>
